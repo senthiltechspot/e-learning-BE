@@ -1,33 +1,32 @@
 import Sequelize from "sequelize";
 import sequelize from "../config/db.js";
 
-const User = sequelize.define(
-  "user",
+const Course = sequelize.define(
+  "course",
   {
-    name: {
+    title: {
       type: Sequelize.STRING,
       allowNull: false,
     },
-    email: {
-      type: Sequelize.STRING,
-      allowNull: false,
-      unique: true,
-      validate: {
-        isEmail: true, // Ensure the email field matches the format of an email address
-      },
-    },
-    password: {
+    category: {
       type: Sequelize.STRING,
       allowNull: false,
     },
-    profilePicture: {
+    level: {
+      type: Sequelize.STRING,
+      allowNull: false,
+    },
+    description: {
+      type: Sequelize.STRING,
+      allowNull: false,
+    },
+    imgURL: {
       type: Sequelize.STRING,
       allowNull: true,
     },
-    role: {
-      type: Sequelize.STRING,
-      allowNull: false,
-      defaultValue: "user",
+    rating: {
+      type: Sequelize.FLOAT,
+      allowNull: true,
     }
   },
   {
@@ -35,4 +34,4 @@ const User = sequelize.define(
   }
 );
 
-export default User;
+export default Course;

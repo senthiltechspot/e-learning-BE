@@ -56,3 +56,11 @@ export const verifyToken = async (req, res, next) => {
     return res.status(401).send("Invalid Token.");
   }
 };
+
+export const isAdmin = async (req, res, next) => {
+  const user = req.user;
+  if (user.role !== "admin") {
+    return res.status(401).send("Access Denied. Admin only.");
+  }
+  next();
+};

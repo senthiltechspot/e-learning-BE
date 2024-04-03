@@ -7,8 +7,12 @@ import { errorHandler } from "../utils/errorHandler.js";
 const registerUser = async (req, res) => {
   try {
     const { name, email, password } = req.body;
-    const HashedPassword = await bcrpyt.hashSync(password, 10);
-    const user = await User.create({ name, email, password: HashedPassword });
+    const HashedPassword = bcrpyt.hashSync(password, 10);
+    const user = await User.create({
+      name,
+      email,
+      password: HashedPassword,
+    });
     res.status(201).json({
       data: {
         id: user.id,
