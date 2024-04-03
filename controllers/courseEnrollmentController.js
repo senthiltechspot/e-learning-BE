@@ -51,7 +51,6 @@ export const getEnrolledCourses = async (req, res) => {
       where: { userId: userId },
       include: [Course], // Specify the model to include inside an array
     });
-    // console.log(enrolledCourses);
     res.status(200).json(enrolledCourses);
   } catch (error) {
     console.error("Error getting enrolled courses:", error);

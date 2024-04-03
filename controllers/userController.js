@@ -129,7 +129,6 @@ const viewUser = async (req, res) => {
 const updateUser = async (req, res) => {
   const { id } = req.params;
   const userId = req._id;
-  console.log(userId, id);
   if (userId !== id) {
     return res.status(401).json({ error: "Unauthorized" });
   }
@@ -225,7 +224,9 @@ cloudinary.config({
 
 const uploadProfilePicture = async (req, res) => {
   const { id } = req.params;
-
+  if (req._id !== id) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
   try {
     if (!req.file) {
       return res.status(400).json({ error: "No file uploaded" });
@@ -239,7 +240,6 @@ const uploadProfilePicture = async (req, res) => {
     }
 
     user.profilePicture = result.secure_url;
-    console.log(user.profilePicture);
     await user.save();
 
     res.status(200).json({
