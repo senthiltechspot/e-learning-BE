@@ -30,6 +30,10 @@ const User = sequelize.define(
       defaultValue: "user",
       enum: ["admin", "user"],
     },
+    resetToken: {
+      type: Sequelize.STRING,
+      allowNull: true,
+    }
   },
   {
     timestamps: true,

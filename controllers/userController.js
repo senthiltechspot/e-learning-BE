@@ -2,17 +2,30 @@ import User from "../models/user.js";
 import bcrpyt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { errorHandler } from "../utils/errorHandler.js";
+import { LoginEmail, RegisterEmail } from "../utils/htmlScript.js";
+import { sendMail } from "../utils/sendMail.js";
 
 // Register User
 const registerUser = async (req, res) => {
   try {
     const { name, email, password } = req.body;
     const HashedPassword = bcrpyt.hashSync(password, 10);
+
+    // check User Allready Registered
+    const isRegistered = await User.findOne({ where: { email } });
+    if (isRegistered) {
+      return res.status(401).json({ error: "User Already Registered" });
+    }
     const user = await User.create({
       name,
       email,
       password: HashedPassword,
     });
+
+    let emailFormat = RegisterEmail(name, email);
+
+    await sendMail(email, "Registration Successful", emailFormat);
+
     res.status(201).json({
       data: {
         id: user.id,
@@ -44,6 +57,9 @@ const loginUser = async (req, res) => {
     const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
       expiresIn: "1h",
     });
+    let name = user.name;
+    let emailFormat = LoginEmail(name, email);
+    await sendMail(email, "Login Successful", emailFormat);
 
     const refreshToken = jwt.sign(
       { id: user.id },
@@ -198,4 +214,54 @@ const RefreshToken = async (req, res) => {
   }
 };
 
-export { registerUser, loginUser, viewUser, updateUser, RefreshToken };
+// Upload Profile Picture using Cloudinary
+import { v2 as cloudinary } from "cloudinary";
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+const uploadProfilePicture = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: "No file uploaded" });
+    }
+    const result = await cloudinary.uploader.upload(
+      `data:${req.file.mimetype};base64,${req.file.buffer.toString("base64")}`
+    );
+    const user = await User.findByPk(id);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    user.profilePicture = result.secure_url;
+    console.log(user.profilePicture);
+    await user.save();
+
+    res.status(200).json({
+      data: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        profilePicture: user.profilePicture,
+        message: "Profile picture uploaded successfully",
+      },
+    });
+  } catch (error) {
+    console.error("Error uploading image:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+export {
+  registerUser,
+  loginUser,
+  viewUser,
+  updateUser,
+  RefreshToken,
+  uploadProfilePicture,
+};

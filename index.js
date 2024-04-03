@@ -1,9 +1,9 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import morgan from "morgan";
 import Route from "./routes/index.js";
 import sequelize from "./config/db.js"; // Import sequelize instance
-import morgan from "morgan";
 import User from "./models/user.js";
 import Course from "./models/course.js";
 import { sampleCourses, sampleUserData } from "./utils/sampleUserData.js";
@@ -15,7 +15,7 @@ const PORT = process.env.PORT || 3000;
 // Middleware
 app.use(cors());
 app.use(cookieParser());
-app.use(express.json());
+app.use(express.json({ limit: "50mb" }));
 app.use(morgan("dev"));
 
 // Sync Sequelize
