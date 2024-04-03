@@ -28,7 +28,8 @@ const User = sequelize.define(
       type: Sequelize.STRING,
       allowNull: false,
       defaultValue: "user",
-    }
+      enum: ["admin", "user"],
+    },
   },
   {
     timestamps: true,
