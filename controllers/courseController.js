@@ -2,20 +2,43 @@ import Course from "../models/course.js";
 import { errorHandler } from "../utils/errorHandler.js";
 
 // Get Courses with filtering and pagination
+// Example: GET /courses?page=1&limit=10&category=Programming&level=Intermediate
 export const getCourses = async (req, res) => {
   try {
-    // Implement filtering options based on req.query parameters
-    // Implement pagination using req.query parameters like page and limit
-    // Example: const courses = await Course.findAll({ where: {...}, limit: ..., offset: ... });
+    // Pagination parameters
+    const page = req.query.page ? parseInt(req.query.page) : 1;
+    const limit = req.query.limit ? parseInt(req.query.limit) : 10;
+    const offset = (page - 1) * limit;
 
-    // Dummy response for now
-    const courses = await Course.findAll();
-    res.json(courses);
+    // Filtering parameters
+    const { category, level } = req.query;
+    const whereClause = {};
+    if (category) {
+      whereClause.category = category;
+    }
+    if (level) {
+      whereClause.level = level;
+    }
+
+    // Fetch courses based on filtering and pagination
+    const courses = await Course.findAndCountAll({
+      where: whereClause,
+      limit: limit,
+      offset: offset,
+    });
+
+    res.json({
+      totalItems: courses.count,
+      totalPages: Math.ceil(courses.count / limit),
+      currentPage: page,
+      courses: courses.rows,
+    });
   } catch (error) {
     console.error("Error fetching courses:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
 
 // CRUD Operations for Superadmin
 export const createCourse = async (req, res) => {
